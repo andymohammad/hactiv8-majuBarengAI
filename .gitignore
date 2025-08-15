@@ -2,3 +2,12 @@
 .env-backup
 /node_modules
 package-lock.json
+
+/gemini-chatbot-api/.env
+/gemini-chatbot-api/.env-backup
+/gemini-chatbot-api/node_modules/*
+/gemini-chatbot-api/package-lock.json
+
+gemini-chatbot-api/node_modules/
+gemini-chatbot-api/.env
+starter/node_modules/
