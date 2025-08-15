@@ -1,6 +1,7 @@
 .env
 .env-backup
-/node_modules
+
+node_modules
 package-lock.json
 
 /gemini-chatbot-api/.env

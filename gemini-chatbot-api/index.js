@@ -1,74 +1,68 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-dotenv.config();
+// Menentukan __dirname di ES Module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Mengatur dotenv untuk memuat file .env dari direktori root
+dotenv.config({ path: `${__dirname}/../.env` });
 
 const app = express();
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+const GEMINI_MODEL = "gemini-1.5-flash";
 const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Gemini setup
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// Routes
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.listen(port, () => {
   console.log(`Gemini Chatbot running on http://localhost:${port}`);
+  console.log(process.env.GEMINI_API_KEY);
 });
 
-// Route penting!
+
+// API CHAT
 app.post('/api/chat', async (req, res) => {
-  const userMessage = req.body.message;
-
-  if (!userMessage) {
-    return res.status(400).json({ reply: "Message is required." });
-  }
-
   try {
-    const result = await model.generateContent(userMessage);
-    const response = await result.response;
-    const text = response.text();
-
-    res.json({ reply: text });
+    const { messages } = req.body;
+    if (!Array.isArray(messages)) throw new Error("messages must be an array");
+    const contents = messages.map(msg => ({
+      role: msg.role,
+      parts: [{ text: msg.content }]
+    }));
+    const resp = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents
+    });
+    res.json({ result: extractText(resp) });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ reply: "Something went wrong." });
+    res.status(500).json({ error: err.message });
   }
 });
 
 
-// Last page
-appendMessage('user', userMessage);
-input.value = '';
-
-// Simulasi dummy balasan bot (placeholder)
-setTimeout(() => {
-  appendMessage('bot', 'Gemini is thinking... (this is dummy response)');
-}, 1000);
-
-// Send message to backend using fetch
-fetch('/api/chat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ message: userMessage }),
-})
-.then(response => {
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+function extractText(resp) {
+  try {
+    const text =
+    resp?.response?.candidates?.[0]?.content?.parts?.[0]?.text ??
+    resp?.candidates?.[0]?.content?.parts?.[0]?.text ??
+    resp?.response?.candidates?.[0]?.content?.text;
+    
+    return text ?? JSON.stringify(resp, null, 2);
+  } catch (err) {
+    console.log("Error extracting text:", err);
+    return JSON.stringify(resp, null, 2);
   }
-  return response.json();
-})
-.then(data => {
-  appendMessage('bot', data.reply); // Assuming your backend sends back { reply: "..." }
-})
-.catch(error => {
-  console.error('Error sending message:', error);
-  appendMessage('bot', 'Error: Could not get a response.'); // Display an error message
-});
+}
