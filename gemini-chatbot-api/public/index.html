@@ -4,16 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gemini AI Chatbot</title>
+  <!-- Google Fonts Link -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Boxicons Link for Icons -->
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="container">
-    <h1>Gemini AI Chatbot</h1>
-    <div id="chat-box" class="chat-box"></div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required />
-      <button type="submit">Send</button>
-    </form>
+  <div class="chatbot">
+    <header>
+      <div class="header-content">
+        <i class='bx bxs-bot bx-burst' ></i>
+        <div class="header-text">
+          <h2>Gemini AI</h2>
+          <span>Online</span>
+        </div>
+      </div>
+    </header>
+    <ul id="chat-box" class="chat-box">
+      <!-- Initial welcome message -->
+      <li class="message incoming">
+        <i class='bx bxs-bot avatar'></i>
+        <p>Halo! 👋<br>Ada yang bisa saya bantu hari ini?</p>
+      </li>
+    </ul>
+    <div class="chat-input">
+      <form id="chat-form" class="chat-form">
+        <textarea id="user-input" placeholder="Ketik pesan Anda..." required></textarea>
+        <button type="submit" id="send-btn">
+          <i class='bx bxs-send'></i>
+        </button>
+      </form>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
